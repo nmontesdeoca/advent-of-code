@@ -30,12 +30,13 @@ Benchmarks just measure how fast `part1` and `part2` run on the actual input.
 
 ## 2025 Solutions
 
-| Day                         | Part 1  | Part 2 | Notes                           |
-| --------------------------- | ------- | ------ | ------------------------------- |
-| [Day 1](2025/day-1/main.go) | 25.4 µs | 291 µs | String validation across ranges |
-| [Day 2](2025/day-2/main.go) | 35.3 ms | 148 ms | Pattern detection in ID strings |
+| Day                         | Part 1  | Part 2   | Notes                              |
+| --------------------------- | ------- | -------- | ---------------------------------- |
+| [Day 1](2025/day-1/main.go) | 25.4 µs | 291 µs   | String validation across ranges    |
+| [Day 2](2025/day-2/main.go) | 35.3 ms | 148 ms   | Pattern detection in ID strings    |
+| [Day 3](2025/day-3/main.go) | 45.4 µs | 128.0 µs | Grid traversal and neighbor checks |
 
-Benchmarked on: 12th Gen Intel(R) Core(TM) i9-12900HX
+Benchmarked on: 12th Gen Intel(R) Core(TM) i9-12900HX (benchmarks updated: 2025-12-31)
 
 ## More info
 
