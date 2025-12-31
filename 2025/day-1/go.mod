@@ -1,0 +1,3 @@
+module github.com/nmontesdeoca/advent-of-code/2025/day-1
+
+go 1.25.5
