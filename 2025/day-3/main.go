@@ -3,13 +3,13 @@ package main
 import (
 	"fmt"
 	"log"
+	"math/big"
 	"os"
-	"strconv"
 	"strings"
 )
 
 func main() {
-	data, err := os.ReadFile("./input_test.txt")
+	data, err := os.ReadFile("./input.txt")
 
 	if err != nil {
 		log.Fatal(err)
@@ -21,96 +21,53 @@ func main() {
 	fmt.Println("part 2", part2(lines))
 }
 
-func part1(lines []string) int {
-	totalJoltage := 0
-
-	for _, line := range lines {
-		var lineJoltage int
-		// n and m will be my 2 numbers forming number nm
-		lineLength := len(line)
-		n := line[lineLength-2]
-		m := line[lineLength-1]
-
-		for i := lineLength - 3; i >= 0; i-- {
-			if line[i] >= n {
-				if n >= m {
-					m = n
-				}
-				n = line[i]
-			}
-		}
-
-		lineJoltage, _ = strconv.Atoi(string([]byte{n, m}))
-		totalJoltage += lineJoltage
-	}
-
-	return totalJoltage
+func part1(lines []string) *big.Int {
+	return sumSelected(lines, 2)
 }
 
-func part2(lines []string) int {
-	totalJoltage := 0
-
-	for _, line := range lines {
-		var i int
-		var v byte
-		lineJoltageBytes := make([]byte, 0, 12)
-
-		i, v = getHighestJoltage(line[0 : len(line)-11])
-		lineJoltageBytes = append(lineJoltageBytes, v)
-
-		i, v = getHighestJoltage(line[i+1 : len(line)-10])
-		lineJoltageBytes = append(lineJoltageBytes, v)
-
-		i, v = getHighestJoltage(line[i+1 : len(line)-9])
-		lineJoltageBytes = append(lineJoltageBytes, v)
-
-		i, v = getHighestJoltage(line[i+1 : len(line)-8])
-		lineJoltageBytes = append(lineJoltageBytes, v)
-
-		i, v = getHighestJoltage(line[i+1 : len(line)-7])
-		lineJoltageBytes = append(lineJoltageBytes, v)
-
-		i, v = getHighestJoltage(line[i+1 : len(line)-6])
-		lineJoltageBytes = append(lineJoltageBytes, v)
-
-		i, v = getHighestJoltage(line[i+1 : len(line)-5])
-		lineJoltageBytes = append(lineJoltageBytes, v)
-
-		i, v = getHighestJoltage(line[i+1 : len(line)-4])
-		lineJoltageBytes = append(lineJoltageBytes, v)
-
-		i, v = getHighestJoltage(line[i+1 : len(line)-3])
-		lineJoltageBytes = append(lineJoltageBytes, v)
-
-		i, v = getHighestJoltage(line[i+1 : len(line)-2])
-		lineJoltageBytes = append(lineJoltageBytes, v)
-
-		i, v = getHighestJoltage(line[i+1 : len(line)-1])
-		lineJoltageBytes = append(lineJoltageBytes, v)
-
-		i, v = getHighestJoltage(line[i+1:])
-		lineJoltageBytes = append(lineJoltageBytes, v)
-		fmt.Println(string(lineJoltageBytes))
-		lineJoltage, _ := strconv.Atoi(string(lineJoltageBytes))
-		totalJoltage += lineJoltage
-	}
-
-	return totalJoltage
+func part2(lines []string) *big.Int {
+	return sumSelected(lines, 12)
 }
 
-func getHighestJoltage(line string) (int, byte) {
-	var max byte
-	var index int
-
-	for i, v := range line {
-		if byte(v) > max {
-			max = byte(v)
-			index = i
-
+// maxSubsequence returns the lexicographically largest subsequence of length k
+// from the digit string s (keeps original order). Assumes s contains only '0'..'9'.
+// If k >= len(s) it returns s.
+func maxSubsequence(s string, k int) string {
+	n := len(s)
+	if k >= n {
+		return s
+	}
+	stack := make([]byte, 0, k)
+	for i := 0; i < n; i++ {
+		ch := s[i]
+		rem := n - i // remaining characters including current
+		// pop while we can replace a smaller previous digit with a larger current one
+		for len(stack) > 0 && stack[len(stack)-1] < ch && (len(stack)-1+rem) >= k {
+			stack = stack[:len(stack)-1]
+		}
+		if len(stack) < k {
+			stack = append(stack, ch)
 		}
 	}
+	// safety: trim if somehow longer
+	if len(stack) > k {
+		stack = stack[:k]
+	}
+	return string(stack)
+}
 
-	fmt.Println("line", line, "max", string(max), "index", index)
-
-	return index, max
+// sumSelected takes a slice of digit-strings and picks the max subsequence
+// of length k from each, parsing them as big.Int and summing. Returns the sum.
+func sumSelected(lines []string, k int) *big.Int {
+	total := big.NewInt(0)
+	for _, line := range lines {
+		selected := maxSubsequence(line, k)
+		v := new(big.Int)
+		if _, ok := v.SetString(selected, 10); !ok {
+			// Shouldn't happen for digit-only strings
+			panic("failed to parse big integer from selected digits: " + selected)
+		}
+		total.Add(total, v)
+	}
+	return total
 }
